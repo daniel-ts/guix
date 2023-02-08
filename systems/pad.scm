@@ -1,5 +1,6 @@
 
 (use-modules (gnu)
+             (gnu system setuid)
              (gnu packages)
              (gnu services)
              (nongnu packages linux)
@@ -86,8 +87,8 @@
 
  (packages
   (append (map specification->package
-	       '("btrfs-progs" "cryptsetup" "curl" "dnsmasq" "emacs-next-pgtk" "git" "gnupg" "htop" "kitty" "make" "mesa" "nano" "neovim" "network-manager" "network-manager-openvpn" "nss-certs" "ntfs-3g" "ntp" "libva" "libva-utils" "openntpd" "openssh" "pipewire" "radeontop" "rsync" "stow" "tree" "vdpauinfo" "wget" "wireguard-tools" "wireplumber" "xdg-desktop-portal-gtk" "xf86-video-amdgpu" "zsh" "strace" "lsof" "pinentry" "qtwayland@5"))
-	  %base-packages))
+	           '("btrfs-progs" "cryptsetup" "curl" "dnsmasq" "emacs-next-pgtk" "git" "gnupg" "htop" "kitty" "make" "mesa" "nano" "neovim" "network-manager" "network-manager-openvpn" "nss-certs" "ntfs-3g" "ntp" "libva" "libva-utils" "openntpd" "openssh" "pipewire" "radeontop" "rsync" "stow" "tree" "vdpauinfo" "wget" "wireguard-tools" "wireplumber" "xdg-desktop-portal-gtk" "xf86-video-amdgpu" "zsh" "strace" "lsof" "pinentry" "qtwayland@5" "swaylock" "libvdpau" "libvdpau-va-gl"))
+	      %base-packages))
 
  (services
   (append (list (service network-manager-service-type
@@ -129,9 +130,10 @@
         (extra-special-file "/bin/pinentry-gtk-2" (file-append pinentry "/bin/pinentry-gtk-2"))
 
 		;; graphics acceleration
-		(extra-special-file "/usr/lib/vdpau/libvdpau_radeonsi.so" (file-append mesa "/lib/vdpau/libvdpau_radeonsi.so"))
 		(simple-service 'vdpau-driver-service session-environment-service-type
-				        '(("VDPAU_DRIVER" . "radeonsi")))
+				        `(("LIBVA_DRIVERS_PATH" . ,(file-append mesa "/lib/dri"))
+                          ("LIBVA_DRIVER_NAME" . "radeonsi")
+                          ("VDPAU_DRIVER" . "radeonsi")))
 		)
 	  (modify-services
 	   %base-services
@@ -142,7 +144,13 @@
 			       (authorized-keys (cons* (plain-file "non-guix.pub" "(public-key
                                                         (ecc (curve Ed25519)
                                                              (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))")
-						       %default-authorized-guix-keys)))))))
+						                   %default-authorized-guix-keys)))))))
 
-
+ (setuid-programs
+  (append
+   (list (file-like->setuid-program
+	      (file-append
+		   (specification->package "swaylock")
+		   "/bin/swaylock")))
+   %setuid-programs))
 )
