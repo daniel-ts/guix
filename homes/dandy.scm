@@ -19,20 +19,22 @@
 ;; (use-service-modules audio)
 
 (define my-base-packages (map specification->package
-                              '("adwaita-icon-theme" "btrfs-progs" "cmake" "cpupower" "cryptsetup" "cups" "curl" "docker" "emacs-guix" "emacs-next-pgtk" "flatpak" "foomatic-filters" "fuse" "fzf" "gcc" "ghostscript" "git" "gnupg" "guile-colorized" "hicolor-icon-theme" "hplip" "htop" "icecat" "icedove" "ijs" "jq" "kitty" "libappindicator" "lxd" "make" "meson" "mpd" "mpd-mpc" "nano" "neovim" "network-manager" "network-manager-applet" "network-manager-openvpn" "nss-certs" "ntfs-3g" "ntp" "openjdk" "openntpd" "openssh" "pipewire"  "rsync" "sane-backends"  "splix" "stow" "tree" "wget" "wireguard-tools" "wireplumber" "zsh"  "pinentry-tty" "pinentry" "qtwayland@5" "gcc-toolchain" "qtkeychain" "openssl@1.1.1l" "texlive" "python" "pkg-config" "sqlite"  )))
+                              '("adwaita-icon-theme" "btrfs-progs" "cmake" "cpupower" "cryptsetup" "cups" "curl" "docker" "emacs-guix" "emacs-next-pgtk" "flatpak" "foomatic-filters" "fzf" "gcc" "ghostscript" "git" "gnupg" "guile-colorized" "hicolor-icon-theme" "hplip" "htop" "icecat" "icedove" "ijs" "jq" "kitty" "libappindicator" "lxd" "make" "meson" "mpd" "mpd-mpc" "nano" "neovim" "network-manager" "network-manager-applet" "network-manager-openvpn" "nss-certs" "ntfs-3g" "ntp" "openjdk" "openntpd" "openssh" "pipewire"  "rsync" "sane-backends"  "splix" "stow" "tree" "wget" "wireguard-tools" "wireplumber" "zsh"  "pinentry-tty" "pinentry" "gcc-toolchain" "qtkeychain" "openssl@1.1.1l" "texlive@20210325" "python" "pkg-config" "sqlite" "nmap" "zstd")))
 
 (define my-base-fonts (map specification->package
                            '("font-adobe-source-code-pro" "font-adobe-source-han-sans" "font-adobe-source-sans-pro" "font-adobe-source-serif-pro" "font-adobe100dpi" "font-adobe75dpi" "font-anonymous-pro" "font-anonymous-pro-minus" "font-awesome" "font-bitstream-vera" "font-blackfoundry-inria" "font-cns11643" "font-cns11643-swjz" "font-comic-neue" "font-cronyx-cyrillic" "font-culmus" "font-dec-misc" "font-dejavu" "font-dosis" "font-dseg" "font-fantasque-sans" "font-fira-code" "font-fira-mono" "font-fira-sans" "font-fontna-yasashisa-antique" "font-gnu-freefont" "font-gnu-unifont" "font-go" "font-google-material-design-icons" "font-google-noto" "font-google-roboto" "font-hack" "font-hermit" "font-ibm-plex" "font-inconsolata" "font-iosevka" "font-iosevka-aile" "font-iosevka-etoile" "font-iosevka-slab" "font-iosevka-term" "font-iosevka-term-slab" "font-ipa-mj-mincho" "font-isas-misc" "font-jetbrains-mono" "font-lato" "font-liberation" "font-linuxlibertine" "font-lohit" "font-meera-inimai" "font-micro-misc" "font-misc-cyrillic" "font-misc-ethiopic" "font-misc-misc" "font-mononoki" "font-mplus-testflight" "font-mutt-misc" "font-opendyslexic" "font-public-sans" "font-rachana" "font-sarasa-gothic" "font-schumacher-misc" "font-screen-cyrillic" "font-sil-andika" "font-sil-charis" "font-sil-gentium" "font-sony-misc" "font-sun-misc" "font-tamzen" "font-terminus" "font-tex-gyre" "font-un" "font-util" "font-vazir" "font-winitzki-cyrillic" "font-wqy-microhei" "font-wqy-zenhei" "font-xfree86-type1")))
 
 (define my-desktop-packages
   (map specification->package
-       '("firefox-wayland" "redshift-wayland" "rofi-wayland" "sway" "sway" "swaybg" "swayidle" "waybar" "wl-clipboard" "xorg-server-xwayland" "dunst" "shared-mime-info" "nautilus" "telegram-desktop" "ungoogled-chromium-wayland" "pavucontrol" "seahorse" "qtbase@5" "qtwebsockets@5" "qtsvg@5" "qtdeclarative@5" "qtquickcontrols2@5"  "qtwebengine@5" "karchive" "xdg-desktop-portal" "xdg-desktop-portal-wlr" "xdg-desktop-portal-gtk" "evince")))
+       '("firefox-wayland" "redshift-wayland" "rofi-wayland" "sway" "sway" "swaybg" "swayidle" "waybar" "wl-clipboard" "xorg-server-xwayland" "dunst" "shared-mime-info" "nautilus" "telegram-desktop" "ungoogled-chromium-wayland" "pavucontrol" "seahorse" "qtbase" "qtwayland" "qtwebsockets" "qtsvg" "qtdeclarative" "qtquickcontrols2"  "qtwebengine" "karchive" "xdg-desktop-portal" "xdg-desktop-portal-wlr" "xdg-desktop-portal-gtk" "grim" "evince" "flameshot")))
 
 (define zlogin-contents "
   if [ -z $DISPLAY ] && [ \"$(tty)\" = '/dev/tty1' ]; then
+      SDL_VIDEODRIVER=wayland
       export MOZ_ENABLE_WAYLAND=1
       export QT_QPA_PLATFORM='wayland;xcb'
       export XDG_CURRENT_DESKTOP=sway
+      export XDG_SESSION_DESKTOP=sway
       export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
       export _JAVA_AWT_WM_NONREPARENTING=1
       exec sway

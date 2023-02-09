@@ -1,4 +1,3 @@
-
 (use-modules (gnu)
              (gnu system setuid)
              (gnu packages)
@@ -7,7 +6,7 @@
              (nongnu system linux-initrd)
              (guix gexp))
 
-(use-package-modules gnome scanner cups freedesktop shells bash emacs nano video gl gnupg)
+(use-package-modules gnome scanner cups freedesktop shells bash emacs nano video gl gnupg python polkit)
 (use-service-modules admin base cups dbus desktop networking ssh)
 
 
@@ -34,8 +33,7 @@
                (comment "primary user and admin")
                (group "users")
                (shell (file-append zsh "/bin/zsh"))
-               (supplementary-groups '("wheel"
-                                       "audio" "video" "disk" "input")))
+               (supplementary-groups '("wheel" "audio" "video" "disk" "input" "cdrom" "scanner" "lp")))
               %base-user-accounts))
 
  (mapped-devices
@@ -87,7 +85,7 @@
 
  (packages
   (append (map specification->package
-	           '("btrfs-progs" "cryptsetup" "curl" "dnsmasq" "emacs-next-pgtk" "git" "gnupg" "htop" "kitty" "make" "mesa" "nano" "neovim" "network-manager" "network-manager-openvpn" "nss-certs" "ntfs-3g" "ntp" "libva" "libva-utils" "openntpd" "openssh" "pipewire" "radeontop" "rsync" "stow" "tree" "vdpauinfo" "wget" "wireguard-tools" "wireplumber" "xdg-desktop-portal-gtk" "xf86-video-amdgpu" "zsh" "strace" "lsof" "pinentry" "qtwayland@5" "swaylock" "libvdpau" "libvdpau-va-gl"))
+	           '("btrfs-progs" "cryptsetup" "curl" "dnsmasq" "emacs-next-pgtk" "git" "gnupg" "htop" "kitty" "make" "mesa" "nano" "neovim" "network-manager" "network-manager-openvpn" "nss-certs" "ntfs-3g" "ntp" "libva" "libva-utils" "openntpd" "openssh" "pipewire" "radeontop" "rsync" "stow" "tree" "vdpauinfo" "wget" "wireguard-tools" "wireplumber" "xdg-desktop-portal-gtk" "xf86-video-amdgpu" "zsh" "strace" "lsof" "pinentry" "qtwayland@5" "swaylock" "libvdpau" "fuse" "jmtpfs" "polkit-gnome" "polkit-kde-agent" "python-wrapper"))
 	      %base-packages))
 
  (services
@@ -125,6 +123,7 @@
 		(extra-special-file "/bin/emacs" (file-append emacs-next-pgtk "/bin/emacs"))
 		(extra-special-file "/bin/emacsclient" (file-append emacs-next-pgtk "/bin/emacsclient"))
 		(extra-special-file "/bin/nano" (file-append nano "/bin/nano"))
+        (extra-special-file "/bin/python" (file-append python "/bin/python"))
         (extra-special-file "/bin/pinentry" (file-append pinentry "/bin/pinentry-gtk-2"))
         (extra-special-file "/bin/pinentry-curses" (file-append pinentry "/bin/pinentry-curses"))
         (extra-special-file "/bin/pinentry-gtk-2" (file-append pinentry "/bin/pinentry-gtk-2"))
@@ -134,7 +133,25 @@
 				        `(("LIBVA_DRIVERS_PATH" . ,(file-append mesa "/lib/dri"))
                           ("LIBVA_DRIVER_NAME" . "radeonsi")
                           ("VDPAU_DRIVER" . "radeonsi")))
-		)
+
+        ;; (simple-service
+;;          'my-polkit-rules-service polkit-service
+;;          (list
+;;           (file-union "my-polkit-rules"
+;;                       `(("etc/polkit-1/rules.d" ,(plain-file "20-my-login.rules" "
+;; polkit.addRule(function(action, subject) {
+;;     if ((action.id == \"org.freedesktop.login1.power-off\"
+;; 		 || action.id == \"org.freedesktop.login1.reboot\"
+;; 		 || action.id == \"org.freedesktop.login1.halt\"
+;; 		 || action.id == \"org.freedesktop.login1.suspend\"
+;; 		 || action.id == \"org.freedesktop.login1.hibernate\") &&
+;; 		(subject.isInGroup(\"wheel\")))
+;; 	{
+;; 		return polkit.Result.YES;
+;; 	}
+;; });
+;; "))))))
+        ) ; end services list
 	  (modify-services
 	   %base-services
 	   (guix-service-type config =>
@@ -151,6 +168,14 @@
    (list (file-like->setuid-program
 	      (file-append
 		   (specification->package "swaylock")
-		   "/bin/swaylock")))
+		   "/bin/swaylock"))
+         (file-like->setuid-program
+	      (file-append
+		   (specification->package "fuse@2")
+		   "/bin/fusermount"))
+         (file-like->setuid-program
+	      (file-append
+		   (specification->package "fuse")
+		   "/bin/fusermount3")))
    %setuid-programs))
 )
